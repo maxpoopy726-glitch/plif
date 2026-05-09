@@ -48,6 +48,13 @@ Rayfield:Notify({
    Image = nil,
 })
 
+local Button = Tab:CreateButton({
+   Name = "Exit",
+   Callback = function()
+   Rayfield:Destroy()
+   end,
+})
+
 local Button = MainTab:CreateButton({
    Name = "ESP Gold",
    Callback = function()
@@ -72,14 +79,6 @@ local Button = MainTab:CreateButton({
           highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
           highlight.Parent = parentPart
       end
-   end,
-})
-
-local Button = Tab:CreateButton({
-   Name = "Reset",
-   Callback = function()
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/maxpoopy726-glitch/plif/refs/heads/main/HelloWorld.lua"))()
-   Rayfield:Destroy()
    end,
 })
 
