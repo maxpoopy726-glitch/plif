@@ -26,16 +26,77 @@ local Window = Rayfield:CreateWindow({
 local MainTab = Window:CreateTab("🏡 Home 🏡", nil) 
 local MainSection = MainTab:CreateSection("Fun Stuff")
 
--- Storage for settings
+-- Variables
 local replicated = game:GetService("ReplicatedStorage")
-local scriptfolder = replicated:FindFirstChild("HiddenScripts") or Instance.new("Folder")
+local scriptfolder = replicated:FindFirstChild("HiddenScripts") or Instance.new("Folder", replicated)
 scriptfolder.Name = "HiddenScripts"
-scriptfolder.Parent = replicated
 
-local targetWalkSpeed = 16 -- Default speed stored here
+local goldPartsList = {} -- Stores parts for the TP button
+local tpIndex = 1 -- Keeps track of which gold part to TP to next
 
--- 1. WalkSpeed Slider (Sets the target value only)
-local SpeedSlider = MainTab:CreateSlider({
+-- ESP & Cleanup Button
+local Button = MainTab:CreateButton({
+   Name = "ESP & Clean Chests",
+   Callback = function()
+      goldPartsList = {} -- Reset list
+      tpIndex = 1
+      
+      for _, v in workspace:GetDescendants() do 
+          if v.Name == "Gold" then 
+              table.insert(goldPartsList, v)
+              
+              -- 1. Highlight Logic
+              if v:FindFirstChild("GoldHighlight") then v.GoldHighlight:Destroy() end
+              local highlight = Instance.new("Highlight")
+              highlight.Name = "GoldHighlight"
+              highlight.FillColor = Color3.fromRGB(255, 215, 0)
+              highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+              highlight.Parent = v
+
+              -- 2. Cleanup Logic: Delete siblings in the parent folder
+              local parentFolder = v.Parent
+              if parentFolder then
+                  for _, sibling in parentFolder:GetChildren() do
+                      -- Deletes everything that isn't the Gold part or the Highlight
+                      if sibling ~= v and not sibling:IsA("Highlight") then
+                          sibling:Destroy()
+                      end
+                  end
+              end
+          end 
+      end
+      
+      Rayfield:Notify({
+          Title = "Success",
+          Content = "Chests cleaned and highlights added!",
+          Duration = 3
+      })
+   end,
+})
+
+-- Teleport Button
+local TPButton = MainTab:CreateButton({
+   Name = "TP to Next Gold",
+   Callback = function()
+      if #goldPartsList == 0 then
+          Rayfield:Notify({Title = "Error", Content = "Run ESP & Clean first!", Duration = 3})
+          return
+      end
+
+      local target = goldPartsList[tpIndex]
+      if target and target:IsA("BasePart") then
+          game.Players.LocalPlayer.Character:MoveTo(target.Position + Vector3.new(0, 3, 0))
+          
+          -- Cycle to next index
+          tpIndex = tpIndex + 1
+          if tpIndex > #goldPartsList then tpIndex = 1 end -- Loop back to first one
+      end
+   end,
+})
+
+-- WalkSpeed Slider & Toggle
+local targetWalkSpeed = 16
+MainTab:CreateSlider({
    Name = "Set Target Speed",
    Range = {0, 500},
    Increment = 1,
@@ -44,70 +105,20 @@ local SpeedSlider = MainTab:CreateSlider({
    Flag = "TargetSpeedValue", 
    Callback = function(Value)
        targetWalkSpeed = Value
-       -- If the toggle is already ON, update the speed immediately
-       local character = game.Players.LocalPlayer.Character
-       local humanoid = character and character:FindFirstChild("Humanoid")
-       if humanoid and _G.SpeedEnabled then
-           humanoid.WalkSpeed = targetWalkSpeed
+       if _G.SpeedEnabled and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+           game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = targetWalkSpeed
        end
    end,
 })
 
--- 2. WalkSpeed Toggle (The "Tick" logic)
-local SpeedToggle = MainTab:CreateToggle({
+MainTab:CreateToggle({
    Name = "Enable Custom Walkspeed",
    CurrentValue = false,
    Flag = "SpeedTick",
    Callback = function(Value)
        _G.SpeedEnabled = Value
-       local character = game.Players.LocalPlayer.Character
-       local humanoid = character and character:FindFirstChild("Humanoid")
-       
-       if humanoid then
-           if Value then
-               humanoid.WalkSpeed = targetWalkSpeed
-           else
-               humanoid.WalkSpeed = 16 -- Reset to default Roblox speed
-           end
-       end
-   end,
-})
-
--- 3. No Water Damage (Moves the whole parent folder)
-local WaterToggle = MainTab:CreateToggle({
-   Name = "No Water Damage",
-   CurrentValue = false,
-   Flag = "waterdamage", 
-   Callback = function(Value)
-      local waterFolder = workspace:FindFirstChild("WaterParts")
-      local hiddenFolder = scriptfolder:FindFirstChild("WaterParts")
-
-      if Value then
-          if waterFolder then
-              waterFolder.Parent = scriptfolder
-          end
-      else
-          if hiddenFolder then
-              hiddenFolder.Parent = workspace
-          end
-      end
-   end,
-})
-
--- ESP Button
-local Button = MainTab:CreateButton({
-   Name = "ESP Gold",
-   Callback = function()
-      for _, v in workspace:GetDescendants() do 
-          if v.Name == "Gold" then 
-              if v:FindFirstChild("GoldHighlight") then v.GoldHighlight:Destroy() end
-              local highlight = Instance.new("Highlight")
-              highlight.Name = "GoldHighlight"
-              highlight.FillColor = Color3.fromRGB(255, 215, 0)
-              highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-              highlight.Parent = v
-          end 
-      end
+       local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+       if hum then hum.WalkSpeed = Value and targetWalkSpeed or 16 end
    end,
 })
 
@@ -115,15 +126,6 @@ local Button = MainTab:CreateButton({
 local Exit = MainTab:CreateButton({
    Name = "Exit",
    Callback = function()
-       -- Restore everything before closing
-       local hiddenFolder = scriptfolder:FindFirstChild("WaterParts")
-       if hiddenFolder then hiddenFolder.Parent = workspace end
-       
-       local character = game.Players.LocalPlayer.Character
-       if character and character:FindFirstChild("Humanoid") then
-           character.Humanoid.WalkSpeed = 16
-       end
-       
        Rayfield:Destroy()
    end,
 })
