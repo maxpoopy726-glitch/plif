@@ -48,12 +48,7 @@ Rayfield:Notify({
    Image = nil,
 })
 
-local Reset = MainTab:CreateButton({
-   Name = "Exit",
-   Callback = function()
-   Rayfield:Destroy()
-   end,
-})
+
 
 local Button = MainTab:CreateButton({
    Name = "ESP Gold",
@@ -109,5 +104,12 @@ local Slider = MainTab:CreateSlider({
            -- Fixed: Capital 'S' in WalkSpeed
            character.Humanoid.WalkSpeed = Value
        end
+   end,
+})
+
+local Reset = MainTab:CreateButton({
+   Name = "Exit",
+   Callback = function()
+   Rayfield:Destroy()
    end,
 })
