@@ -75,6 +75,14 @@ local Button = MainTab:CreateButton({
    end,
 })
 
+local Button = Tab:CreateButton({
+   Name = "Reset",
+   Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/maxpoopy726-glitch/plif/refs/heads/main/HelloWorld.lua"))()
+   Rayfield:Destroy()
+   end,
+})
+
 local Toggle = Tab:CreateToggle({
    Name = "No Water Damage",
    CurrentValue = false,
