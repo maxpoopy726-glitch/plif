@@ -48,7 +48,7 @@ Rayfield:Notify({
    Image = nil,
 })
 
-local Reset = Tab:CreateButton({
+local Reset = MainTab:CreateButton({
    Name = "Exit",
    Callback = function()
    Rayfield:Destroy()
@@ -82,7 +82,7 @@ local Button = MainTab:CreateButton({
    end,
 })
 
-local Toggle = Tab:CreateToggle({
+local Toggle = MainTab:CreateToggle({
    Name = "No Water Damage",
    CurrentValue = false,
    Flag = "waterdamage", -- A flag is the identifier for the configuration file; make sure every element has a different flag if you're using configuration saving to ensure no overlaps
