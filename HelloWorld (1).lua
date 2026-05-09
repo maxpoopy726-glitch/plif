@@ -74,7 +74,6 @@ local Button = MainTab:CreateButton({
    end,
 })
 
--- Teleport Button
 local TPButton = MainTab:CreateButton({
    Name = "TP to Next Gold",
    Callback = function()
