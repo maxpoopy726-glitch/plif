@@ -48,7 +48,7 @@ Rayfield:Notify({
    Image = nil,
 })
 
-local Button = Tab:CreateButton({
+local Reset = Tab:CreateButton({
    Name = "Exit",
    Callback = function()
    Rayfield:Destroy()
