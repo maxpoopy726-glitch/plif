@@ -78,18 +78,12 @@ local Button = MainTab:CreateButton({
 local TPButton = MainTab:CreateButton({
    Name = "TP to Next Gold",
    Callback = function()
-      if #goldPartsList == 0 then
-          Rayfield:Notify({Title = "Error", Content = "Run ESP & Clean first!", Duration = 3})
-          return
-      end
-
-      local target = goldPartsList[tpIndex]
-      if target and target:IsA("BasePart") then
-          game.Players.LocalPlayer.Character:MoveTo(target.Position + Vector3.new(0, 3, 0))
-          
-          -- Cycle to next index
-          tpIndex = tpIndex + 1
-          if tpIndex > #goldPartsList then tpIndex = 1 end -- Loop back to first one
+      local goldparts = {}
+      for _, v in workspace:GetDescendants() do
+        if v.Name == "Part" and v.Parent.Name == "Gold" then
+          LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+          task.wait(0.01)
+        end
       end
    end,
 })
