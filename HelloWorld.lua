@@ -30,7 +30,7 @@ local Window = Rayfield:CreateWindow({
       FileName = "Keyforent1r11",
       SaveKey = false,
       GrabKeyFromSite = false,
-      Key = {"Key1109888"}
+      Key = {"mosanzcd"}
    }
 })
 
