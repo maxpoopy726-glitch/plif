@@ -32,7 +32,7 @@ local scriptfolder = replicated:FindFirstChild("HiddenScripts") or Instance.new(
 scriptfolder.Name = "HiddenScripts"
 
 local goldPartsList = {} -- Stores parts for the TP button
-local tpIndex = 1 -- Keeps track of which gold part to TP to next
+
 
 -- ESP & Cleanup Button
 local Button = MainTab:CreateButton({
@@ -74,15 +74,52 @@ local Button = MainTab:CreateButton({
    end,
 })
 
+-- Teleport Button
+local tpIndex = 1 -- Keep this OUTSIDE the callback to remember your place
+
 local TPButton = MainTab:CreateButton({
    Name = "TP to Next Gold",
    Callback = function()
-      local goldparts = {}
+      local player = game.Players.LocalPlayer
+      local character = player.Character
+      local root = character and character:FindFirstChild("HumanoidRootPart")
+      
+      if not root then return end
+
+      -- 1. Get a fresh list of all current gold parts
+      local goldParts = {}
       for _, v in workspace:GetDescendants() do
-        if v.Name == "Part" and v.Parent.Name == "Gold" then
-          LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
-          task.wait(0.01)
-        end
+         -- Checking for the part named "Part" inside a parent named "Gold"
+         if v:IsA("BasePart") and v.Name == "Part" and v.Parent and v.Parent.Name == "Gold" then
+            table.insert(goldParts, v)
+         end
+      end
+
+      -- 2. Check if any gold even exists
+      if #goldParts == 0 then
+         Rayfield:Notify({Title = "Error", Content = "No Gold parts found in workspace!", Duration = 3})
+         return
+      end
+
+      -- 3. Reset index if it's out of bounds (e.g., gold was collected)
+      if tpIndex > #goldParts then
+         tpIndex = 1
+      end
+
+      -- 4. Teleport to the specific index
+      local target = goldParts[tpIndex]
+      if target then
+         -- Use CFrame + Vector3 to stand 3 studs above the part
+         root.CFrame = target.CFrame + Vector3.new(0, 3, 0)
+         
+         Rayfield:Notify({
+            Title = "Teleported",
+            Content = "Target: " .. tpIndex .. " / " .. #goldParts,
+            Duration = 1.5
+         })
+
+         -- 5. Prepare for the next click
+         tpIndex = tpIndex + 1
       end
    end,
 })
